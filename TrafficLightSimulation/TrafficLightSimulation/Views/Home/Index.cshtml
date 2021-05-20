@@ -1,0 +1,107 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Traffic Light Simulator</title>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.min.css'>
+    <link href="~/style.css" rel="stylesheet" />
+
+</head>
+<body>
+    <!-- partial:index.partial.html -->
+    <div class="container">
+        <div class="circle" color="red" id="red"></div>
+        <div class="circle" color="yellow" id="yellow"></div>
+        <div class="circle" color="green" id="green"></div>
+    </div>
+
+    <!-- partial -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <script>
+
+        const circles = document.querySelectorAll('.circle')
+        let setTimeInterval = 100;
+        let activeLight = 0;
+        var color = "red";
+        var interval;
+        window.onload = trafficLogic();
+        function trafficLogic() {
+             $.ajax({
+               type: "POST",
+                 url: "@Url.Action("LightLogic", "Home")",
+                 data: { "color": color },
+               dataType: "json",
+               success: onSuccess,
+               fail: onFail
+           });
+           function onSuccess(response) {
+               setTimeInterval = response.time;
+               if (response.color == "red") {
+                   $("#red").removeClass();
+                   $("#yellow").removeClass();
+                   $("#green").removeClass();
+                   $("#red").addClass("circle red");
+                   $("#yellow").addClass("circle");
+                   $("#green").addClass("circle");
+                   color = "redyellow";
+               }
+               if (response.color == "redyellow") {
+                   $("#red").removeClass();
+                   $("#yellow").removeClass();
+                   $("#green").removeClass();
+                   $("#red").addClass("circle red");
+                   $("#yellow").addClass("circle yellow");
+                   $("#green").addClass("circle");
+                   color = "green";
+               }
+               if (response.color == "green") {
+                   $("#red").removeClass();
+                   $("#yellow").removeClass();
+                   $("#green").removeClass();
+                   $("#red").addClass("circle");
+                   $("#yellow").addClass("circle");
+                   $("#green").addClass("circle green");
+                   color = "yellow";
+               }
+               if (response.color == "yellow") {
+                   $("#red").removeClass();
+                   $("#yellow").removeClass();
+                   $("#green").removeClass();
+                   $("#red").addClass("circle");
+                   $("#yellow").addClass("circle yellow");
+                   $("#green").addClass("circle");
+                   color = "red";
+               }
+               console.log(setTimeInterval);
+               console.log(response);
+               console.log(color);
+               clearInterval(interval);
+               interval  = window.setInterval(trafficLogic, setTimeInterval);
+           }
+           function onFail(response) {
+               //alert("An error occurred.");
+           }
+        }
+
+       function changeLight() {
+           circles[activeLight].className = 'circle';
+           activeLight++;
+
+           if (activeLight > 2) {
+               activeLight = 0;
+           }
+
+           const currentLight = circles[activeLight]
+
+           currentLight.classList.add(currentLight.getAttribute('color'));
+       }
+    </script>
+
+</body>
+</html>
